@@ -3,6 +3,7 @@ package com.rls.lms.models;
 import com.rls.lms.converters.JSONToMapConverter;
 
 import javax.persistence.*;
+import java.util.HashMap;
 import java.util.Map;
 
 @Entity // This tells Hibernate to make a table out of this class
@@ -11,14 +12,12 @@ public class User {
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Integer id;
-    private Integer user_id;
-    private String name;
-    private String email;
-    private String phone;
+    @Column(name = "userId")
+    private String userId;
     private String company;
     @Column(name = "metadata", columnDefinition = "json")
     @Convert(converter = JSONToMapConverter.class)
-    private Map<String, Object> metadata;
+    private Map<String, Object> metadata = new HashMap<>();
 
     public Integer getId() {
         return id;
@@ -28,37 +27,12 @@ public class User {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-
-    public Integer getUser_id() {
-        return user_id;
-    }
-
-    public void setUser_id(Integer user_id) {
-        this.user_id = user_id;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public String getCompany() {
