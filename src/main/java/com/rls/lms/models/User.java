@@ -12,9 +12,9 @@ public class User {
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Integer id;
-    @Column(name = "userId")
-    private String userId;
-    private String company;
+    @Column(name = "user_id", unique = true)
+    private String user_id;
+    private String domain;
     @Column(name = "metadata", columnDefinition = "json")
     @Convert(converter = JSONToMapConverter.class)
     private Map<String, Object> metadata = new HashMap<>();
@@ -27,20 +27,20 @@ public class User {
         this.id = id;
     }
 
-    public String getUserId() {
-        return userId;
+    public String getUser_id() {
+        return user_id;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setUser_id(String user_id) {
+        this.user_id = user_id;
     }
 
-    public String getCompany() {
-        return company;
+    public String getDomain() {
+        return domain;
     }
 
-    public void setCompany(String company) {
-        this.company = company;
+    public void setDomain(String domain) {
+        this.domain = domain;
     }
 
     public Map<String, Object> getMetadata() {

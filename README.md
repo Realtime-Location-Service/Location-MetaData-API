@@ -2,23 +2,23 @@
 
 1. Support for 10,000 delivery 1 day. Say, morning 1hr, noon 1hr, night 1hr traffic. (10,000 / 3 / 60 / 60) = 1 req/sec
 
-2. **Table**: resource (id: auto inc, name: string, userId: string, company: string, phone: phone, email: email, metadata: json)
+2. **Table**: resource (id: auto inc, user_id: string, domain: string, metadata: json)
 
 3. **POST** for setting single metadata key
    
-   **Endpoint** /set-meta
+   **Endpoint** /api/v1/metadata
    
-   **Payload** {userId: ‘’, metakey: ‘’, metavalue: ‘’}
+   **Payload** {user_id: ‘’, metadata: {}}
 
-4. **GET** for getting all metadata of users
+4. **PATCH** for setting/updating metadata key of a user
    
-   **Endpoint** /get-meta
+   **Endpoint** /api/v1/metadata
    
-   **QueryString** userId=1,2,3
+   **Payload** {user_id: ‘’, metadata: {}}
 
 5. **POST** get user matching query
    
-   **Endpoint** /search
+   **Endpoint** /api/v1/metadata/search
    
    **Payload** 
     

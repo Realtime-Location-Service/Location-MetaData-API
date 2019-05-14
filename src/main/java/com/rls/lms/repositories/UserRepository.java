@@ -8,9 +8,9 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface UserRepository extends JpaRepository<User, Integer> {
-    @Query("SELECT u FROM User u WHERE LOWER(u.company) = LOWER(:company)")
-    List<User> findAll(@Param("company") String company);
+    @Query("SELECT u FROM User u WHERE LOWER(u.domain) = LOWER(:domain)")
+    List<User> findAll(@Param("domain") String domain);
 
-    @Query("SELECT u FROM User u WHERE LOWER(u.userId) = LOWER(:userId) AND LOWER(u.company) = LOWER(:company)")
-    List<User> findByUserId(@Param("userId") String userId, @Param("company") String company);
+    @Query("SELECT u FROM User u WHERE LOWER(u.user_id) = LOWER(:user_id) AND LOWER(u.domain) = LOWER(:domain)")
+    List<User> findByUser_id(@Param("user_id") String user_id, @Param("domain") String domain);
 }
