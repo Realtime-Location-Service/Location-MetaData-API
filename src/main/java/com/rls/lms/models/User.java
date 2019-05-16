@@ -13,6 +13,7 @@ import java.util.Map;
 
 @Entity // This tells Hibernate to make a table out of this class
 @Validated
+@SuppressWarnings("unused")
 public class User {
 
     @Id
