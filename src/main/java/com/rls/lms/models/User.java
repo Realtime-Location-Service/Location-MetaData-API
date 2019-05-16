@@ -10,8 +10,7 @@ import java.util.Map;
 public class User {
 
     @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
-    private Integer id;
+    private String id;
     @Column(name = "user_id", unique = true)
     private String user_id;
     private String domain;
@@ -19,11 +18,11 @@ public class User {
     @Convert(converter = JSONToMapConverter.class)
     private Map<String, Object> metadata = new HashMap<>();
 
-    public Integer getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -31,8 +30,8 @@ public class User {
         return user_id;
     }
 
-    public void setUser_id(String user_id) {
-        this.user_id = user_id;
+    public void setUser_id(String userId) {
+        this.user_id = userId;
     }
 
     public String getDomain() {
