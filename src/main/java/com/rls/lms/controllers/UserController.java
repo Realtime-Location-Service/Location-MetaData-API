@@ -54,26 +54,25 @@ public class UserController {
     @PostMapping(path="/meta") // Map ONLY POST Requests
     public ResponseEntity<String> addNewUser (@RequestHeader("RLS-Referrer") String domain, @RequestBody User user) {
         checkValidation(domain, user.getUser_id());
-        user.setId(createId(domain, user.getUser_id()));
         user.setDomain(domain);
         userRepository.save(user);
         return new ResponseEntity<>("User metadata saved successfully!", HttpStatus.OK);
     }
 
-    @PostMapping(path="/meta/{userId}") // Map ONLY POST Requests
+    @PutMapping(path="/meta/{userId}") // Map ONLY POST Requests
     public ResponseEntity<String> updateUserMeta (@RequestHeader("RLS-Referrer") String domain,
                                                   @PathVariable String userId,
                                                   @RequestBody Map<String, Object> metadata) {
         checkValidation(domain, userId);
         try {
-            userRepository.updateMeta(createId(domain, userId), metadata);
+            userRepository.updateMeta(userId, domain, metadata);
         } catch (JsonProcessingException e) {
             throw new JSONProcessingException(e.getMessage());
         }
         return new ResponseEntity<>("User metadata updated successfully!", HttpStatus.OK);
     }
 
-    @PostMapping(path="/status/{userId}") // Map ONLY POST Requests
+    @PutMapping(path="/status/{userId}") // Map ONLY POST Requests
     public ResponseEntity<String> setStatus (@RequestHeader("RLS-Referrer") String domain,
                                              @PathVariable String userId,
                                              @RequestBody String status) {
@@ -83,9 +82,9 @@ public class UserController {
     }
 
     @PatchMapping(path = "/meta/{userId}")
-    public ResponseEntity<String> setMetadata(@RequestHeader("RLS-Referrer") String domain,
-                                              @PathVariable String userId,
-                                              @RequestBody Map<String, Object> metadata) {
+    public ResponseEntity<String> pathMetadata(@RequestHeader("RLS-Referrer") String domain,
+                                               @PathVariable String userId,
+                                               @RequestBody Map<String, Object> metadata) {
         checkValidation(domain, userId);
         if (metadata == null)
             throw new MissingRequiredFieldException("metadata is missing or invalid.");

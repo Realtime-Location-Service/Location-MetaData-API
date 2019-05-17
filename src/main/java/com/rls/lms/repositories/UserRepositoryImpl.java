@@ -15,7 +15,7 @@ public class UserRepositoryImpl implements ExtendedUserRepository {
 
     @Override
     @Transactional
-    public void patchMetadata(String id, String domain, Map<String, Object> metadata) throws JsonProcessingException {
+    public void patchMetadata(String userId, String domain, Map<String, Object> metadata) throws JsonProcessingException {
         StringBuilder data = new StringBuilder();
 
         for (Map.Entry entry: metadata.entrySet()) {
@@ -30,17 +30,19 @@ public class UserRepositoryImpl implements ExtendedUserRepository {
             }
 
         }
-        @SuppressWarnings({"SqlResolve", "SqlSignature"}) 
-        String query = "UPDATE user u SET u.metadata = JSON_SET(u.metadata"+data+") WHERE u.id=\""+id+"\"";
+        @SuppressWarnings({"SqlResolve", "SqlSignature"})
+        String query = "UPDATE user u SET u.metadata = JSON_SET(u.metadata"+data+") WHERE u.user_id=\""+
+                userId+"\" AND u.domain=\""+domain+"\";";
         em.createNativeQuery(query).executeUpdate();
     }
 
     @Override
     @Transactional
-    public void updateMeta(String id, Map<String, Object> metadata) throws JsonProcessingException {
+    public void updateMeta(String userId, String domain, Map<String, Object> metadata) throws JsonProcessingException {
         String json = new ObjectMapper().writeValueAsString(metadata);
         @SuppressWarnings("SqlResolve")
-        String query = "UPDATE user u SET u.metadata = CAST(\'"+json+"\' AS JSON) WHERE u.id=\""+id+"\"";
+        String query = "UPDATE user u SET u.metadata = CAST(\'"+json+"\' AS JSON) WHERE u.user_id=\""+
+                userId+"\" AND u.domain=\""+domain+"\";";
         em.createNativeQuery(query).executeUpdate();
     }
 

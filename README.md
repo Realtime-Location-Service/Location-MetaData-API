@@ -2,7 +2,14 @@
 
 1. Support for 10,000 delivery 1 day. Say, morning 1hr, noon 1hr, night 1hr traffic. (10,000 / 3 / 60 / 60) = 1 req/sec
 
-2. **Table**: resource (id: auto inc, user_id: string, domain: string, metadata: json)
+2. **Table**: 
+    
+        user (
+            user_id: string (pk), 
+            domain: string (pk), 
+            status: string, 
+            metadata: json
+        )
 
 3. **POST** /api/v1/users/meta
    
@@ -28,9 +35,9 @@
         
         {
              "meta3": "v3",
-         }
+        }
  
-5. **POST** /api/v1/users/meta/{user_id}
+5. **PUT** /api/v1/users/meta/{user_id}
    
    **Description:** Replaces the entire user metadata 
    with the new value.
@@ -43,7 +50,7 @@
          
 6. **GET** /api/v1/users
       
-   **Description:** Returns all the users.
+   **Description:** Returns all the users page by page.
    
    **QueryString:** `page=1&size:100`
    The query params are optional. If not specified only the 
@@ -93,7 +100,7 @@
            }
        }
            
-8. **POST** /api/v1/user/meta/search
+8. **PUT** /api/v1/user/meta/search
    
    **Description** Gets users satisfying the query.
    
