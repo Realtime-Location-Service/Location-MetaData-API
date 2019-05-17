@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rls.lms.converters.DSLToSQLConverter;
 import com.rls.lms.exceptions.InvalidPayloadException;
+import com.rls.lms.exceptions.JSONProcessingException;
 import com.rls.lms.exceptions.UnsupportedPayloadTypeException;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,45 +21,52 @@ public class UserRepositoryImpl implements ExtendedUserRepository {
     @Override
     @Transactional
     public void patch(String userId, String domain, Map<String, Object> payload)
-            throws JsonProcessingException, InvalidPayloadException, UnsupportedPayloadTypeException {
+            throws JSONProcessingException, InvalidPayloadException, UnsupportedPayloadTypeException {
         StringBuilder query = new StringBuilder("UPDATE user u SET ");
-        boolean valid = false;
+        final boolean[] valid = {false};
 
-        for (Map.Entry<String, Object> payloadEntry: payload.entrySet()) {
-            switch (payloadEntry.getKey()) {
+        payload.forEach((payloadKey, payloadValue) -> {
+            switch (payloadKey) {
                 case "status":
-                    if (valid) query.append(", ");
-                    query.append("u.status = '").append(payloadEntry.getValue()).append("'");
-                    valid = true;
+                    if (valid[0]) query.append(", ");
+                    query.append("u.status = '").append(payloadValue).append("'");
+                    valid[0] = true;
                     break;
                 case "metadata":
                     StringBuilder data = new StringBuilder();
                     Map<String, Object> metadata;
 
-                    if (payloadEntry.getValue() instanceof Map) {
+                    if (payloadValue instanceof Map) {
                         //noinspection unchecked
-                        metadata = (Map<String, Object>) payloadEntry.getValue();
+                        metadata = (Map<String, Object>) payloadValue;
                     } else throw new InvalidPayloadException("'metadata is not a valid Map object'");
 
-                    for (Map.Entry<String, Object> entry: metadata.entrySet()) {
-                        if (entry.getValue() instanceof String || entry.getValue() instanceof Boolean ||
-                                entry.getValue() instanceof Integer || entry.getValue() instanceof Float ||
-                                entry.getValue() instanceof Double) {
-                            String json = new ObjectMapper().writeValueAsString(entry.getValue());
-                            data.append(", '$.").append(entry.getKey()).append("', ").append(json);
-                        } else {
-                            String json = new ObjectMapper().writeValueAsString(entry.getValue());
-                            data.append(", '$.").append(entry.getKey()).append("', CAST('").append(json).append("' AS JSON)");
+                    metadata.forEach((key, value) -> {
+                        try {
+                            if (value instanceof String || value instanceof Boolean ||
+                                    value instanceof Integer || value instanceof Float ||
+                                    value instanceof Double) {
+                                String json = new ObjectMapper().writeValueAsString(value);
+                                data.append(", '$.").append(key).append("', ").append(json);
+                            } else {
+                                String json = new ObjectMapper().writeValueAsString(value);
+
+                                data.append(", '$.").append(key).append("', CAST('").append(json).append("' AS JSON)");
+                            }
+                        } catch (JsonProcessingException e) {
+                            throw new JSONProcessingException(e.getMessage());
                         }
-                    }
-                    if (valid) query.append(", ");
+                    });
+
+                    if (valid[0]) query.append(", ");
                     query.append("u.metadata = JSON_SET(u.metadata").append(data).append(")");
-                    valid = true;
+                    valid[0] = true;
                     break;
                 default:
-                    throw new UnsupportedPayloadTypeException("'" + payloadEntry.getKey() + "' is an invalid payload");
+                    throw new UnsupportedPayloadTypeException("'" + payloadKey + "' is an invalid payload");
             }
-        }
+        });
+
         query.append(" WHERE u.user_id=\"").append(userId).append("\" AND u.domain=\"").append(domain).append("\";");
         em.createNativeQuery(query.toString()).executeUpdate();
     }

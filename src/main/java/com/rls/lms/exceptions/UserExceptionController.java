@@ -37,4 +37,9 @@ public class UserExceptionController {
     public ResponseEntity<Object> exception(UnsupportedPayloadTypeException exception) {
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
     }
+    
+    @ExceptionHandler(value = UnsupportedSearchParameter.class)
+    public ResponseEntity<Object> exception(UnsupportedSearchParameter exception) {
+        return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
+    }
 }
