@@ -82,9 +82,9 @@ public class UserController {
     }
 
     @PatchMapping(path = "/meta/{userId}")
-    public ResponseEntity<String> pathMetadata(@RequestHeader("RLS-Referrer") String domain,
-                                               @PathVariable String userId,
-                                               @RequestBody Map<String, Object> metadata) {
+    public ResponseEntity<String> patchMetadata(@RequestHeader("RLS-Referrer") String domain,
+                                                @PathVariable String userId,
+                                                @RequestBody Map<String, Object> metadata) {
         checkValidation(domain, userId);
         if (metadata == null)
             throw new MissingRequiredFieldException("metadata is missing or invalid.");
