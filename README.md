@@ -34,7 +34,15 @@
    **Payload** 
         
         {
-             "meta3": "v3",
+            "metadata": {               // Optional
+                "carying": [
+                    "bag",
+                    "laptop",
+                    "pen",
+                    "rice"
+                ]
+            },
+            "status": "online"          // Optional
         }
  
 
