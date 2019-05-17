@@ -37,18 +37,8 @@
              "meta3": "v3",
         }
  
-5. **PUT** /api/v1/users/meta/{user_id}
-   
-   **Description:** Replaces the entire user metadata 
-   with the new value.
-   
-   **Payload** 
-        
-        {
-             "meta1": "v1",
-        }
-         
-6. **GET** /api/v1/users
+
+5. **GET** /api/v1/users
       
    **Description:** Returns all the users page by page.
    
@@ -56,7 +46,7 @@
    The query params are optional. If not specified only the 
    first 100 will be served.
       
-7. **GET** /api/v1/users?user_ids=
+6. **GET** /api/v1/users?user_ids=
       
    **Description:** Returns all users having user_ids.
   
@@ -100,7 +90,7 @@
            }
        }
            
-8. **PUT** /api/v1/user/meta/search
+7. **POST** /api/v1/user/meta/search
    
    **Description** Gets users satisfying the query.
    

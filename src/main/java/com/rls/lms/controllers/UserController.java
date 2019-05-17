@@ -59,43 +59,32 @@ public class UserController {
         return new ResponseEntity<>("User metadata saved successfully!", HttpStatus.OK);
     }
 
-    @PutMapping(path="/meta/{userId}") // Map ONLY POST Requests
-    public ResponseEntity<String> updateUserMeta (@RequestHeader("RLS-Referrer") String domain,
-                                                  @PathVariable String userId,
-                                                  @RequestBody Map<String, Object> metadata) {
-        checkValidation(domain, userId);
-        try {
-            userRepository.updateMeta(userId, domain, metadata);
-        } catch (JsonProcessingException e) {
-            throw new JSONProcessingException(e.getMessage());
-        }
-        return new ResponseEntity<>("User metadata updated successfully!", HttpStatus.OK);
-    }
-
-    @PutMapping(path="/status/{userId}") // Map ONLY POST Requests
-    public ResponseEntity<String> setStatus (@RequestHeader("RLS-Referrer") String domain,
-                                             @PathVariable String userId,
-                                             @RequestBody String status) {
-        checkValidation(domain, userId);
-        userRepository.updateStatus(createId(domain, userId), status);
-        return new ResponseEntity<>("User status changed successfully!", HttpStatus.OK);
-    }
-
     @PatchMapping(path = "/meta/{userId}")
     public ResponseEntity<String> patchMetadata(@RequestHeader("RLS-Referrer") String domain,
                                                 @PathVariable String userId,
-                                                @RequestBody Map<String, Object> metadata) {
+                                                @RequestBody Map<String, Object> payload) {
         checkValidation(domain, userId);
-        if (metadata == null)
+        if (payload == null)
             throw new MissingRequiredFieldException("metadata is missing or invalid.");
 
         try {
-            userRepository.patchMetadata(createId(domain, userId), domain, metadata);
+            userRepository.patch(userId, domain, payload);
         } catch (JsonProcessingException e) {
             throw new JSONProcessingException(e.getMessage());
         }
 
         return new ResponseEntity<>("User metadata patched successfully!", HttpStatus.OK);
+    }
+
+    @PostMapping(path = "/meta/search")
+    public ResponseEntity<List> search(@RequestHeader("RLS-Referrer") String domain,
+                                         @RequestBody Map<String, Object> queryDSL) {
+        if (domain == null || domain.isBlank())
+            throw new MissingHeaderException("RLS-Referrer header is not present");
+
+        List result = userRepository.findByQueryDSL(queryDSL, domain);
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     private void checkValidation(String domain, String userId) {
@@ -104,9 +93,5 @@ public class UserController {
 
         if (userId == null || userId.isBlank())
             throw new MissingRequiredFieldException("user_id is missing or invalid.");
-    }
-
-    private String createId(String domain, String userId) {
-        return domain+"_"+userId;
     }
 }
