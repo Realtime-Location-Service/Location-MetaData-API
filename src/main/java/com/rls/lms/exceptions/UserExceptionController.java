@@ -17,4 +17,14 @@ public class UserExceptionController {
     public ResponseEntity<Object> exception(MissingHeaderException exception) {
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(value = MissingRequiredFieldException.class)
+    public ResponseEntity<Object> exception(MissingRequiredFieldException exception) {
+        return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(value = JSONProcessingException.class)
+    public ResponseEntity<Object> exception(JSONProcessingException exception) {
+        return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
+    }
 }

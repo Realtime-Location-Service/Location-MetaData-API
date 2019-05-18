@@ -1,6 +1,7 @@
 package com.rls.lms.repositories;
 
 import com.rls.lms.models.User;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -12,8 +13,11 @@ public interface UserRepository extends JpaRepository<User, Integer>, ExtendedUs
 //    User save(@Param("user") User user);
 
     @Query("SELECT u FROM User u WHERE LOWER(u.domain) = LOWER(:domain)")
-    List<User> findAll(@Param("domain") String domain);
+    List<User> findAll(@Param("domain") String domain, Pageable pageable);
 
     @Query("SELECT u FROM User u WHERE LOWER(u.user_id) = LOWER(:userId) AND LOWER(u.domain) = LOWER(:domain)")
     List<User> findByUserId(@Param("userId") String userId, @Param("domain") String domain);
+
+    @Query("SELECT u FROM User u WHERE u.user_id IN (:userIds) AND LOWER(u.domain) = LOWER(:domain)")
+    List<User> find(String domain, String[] userIds);
 }

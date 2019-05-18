@@ -3,14 +3,16 @@ package com.rls.lms.controllers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.rls.lms.exceptions.JSONProcessingException;
 import com.rls.lms.exceptions.MissingHeaderException;
+import com.rls.lms.exceptions.MissingRequiredFieldException;
 import com.rls.lms.models.User;
 import com.rls.lms.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
+import java.util.*;
 
 @RestController    // This means that this class is a Controller
 @RequestMapping(path="/api/v1/users") // This means URL's start with /demo (after Application path)
@@ -25,39 +27,87 @@ public class UserController {
     }
 
     @GetMapping(path="")
-    public ResponseEntity<Iterable<User>> getAllUsers(@RequestHeader("RLS-Referrer") String domain) {
+    public ResponseEntity<Iterable<User>> getAllUsers(@RequestHeader("RLS-Referrer") String domain,
+                                      @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+                                      @RequestParam(value = "size", required = false, defaultValue = "100") int size) {
         if (domain == null || domain.isBlank())
             throw new MissingHeaderException("RLS-Referrer header is not present");
         // This returns a JSON or XML with the users
-        return new ResponseEntity<>(userRepository.findAll(domain), HttpStatus.OK);
+        return new ResponseEntity<>(userRepository.findAll(domain, PageRequest.of(page-1, size)), HttpStatus.OK);
+    }
+
+    @GetMapping(path="", params = { "user_ids" })
+    public ResponseEntity<Map<String, User>> getUsers(@RequestHeader("RLS-Referrer") String domain,
+                           @RequestParam(value = "user_ids", required = false, defaultValue = "") List<String> userIds) {
+        if (domain == null || domain.isBlank())
+            throw new MissingHeaderException("RLS-Referrer header is not present");
+
+        HashMap<String, User> result = new HashMap<>();
+        userIds.forEach((String id) -> result.putIfAbsent(id, null));
+
+        userRepository.find(domain, result.keySet().toArray(new String[]{})).
+                forEach((User u) -> result.replace(u.getUser_id(), u));
+        // This returns a JSON or XML with the users
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @PostMapping(path="/meta") // Map ONLY POST Requests
     public ResponseEntity<String> addNewUser (@RequestHeader("RLS-Referrer") String domain, @RequestBody User user) {
-        if (domain == null || domain.isBlank())
-            throw new MissingHeaderException("RLS-Referrer header is not present");
-        // @ResponseBody means the returned String is the response, not a view name
-        // @RequestParam means it is a parameter from the GET or POST request
-
-        user.setId(domain+"_"+user.getUser_id());
+        checkValidation(domain, user.getUser_id());
+        user.setId(createId(domain, user.getUser_id()));
         user.setDomain(domain);
         userRepository.save(user);
         return new ResponseEntity<>("User metadata saved successfully!", HttpStatus.OK);
     }
 
-    @PatchMapping(path = "/meta")
-    @SuppressWarnings("unchecked")
-    public ResponseEntity<String> setMetadata(@RequestHeader("RLS-Referrer") String domain, @RequestBody Map<String, Object> payload) {
-        if (domain == null || domain.isBlank())
-            throw new MissingHeaderException("RLS-Referrer header is not present");
-
-        Map<String, Object> payloadMetadata = (Map<String, Object>) payload.get("metadata");
+    @PostMapping(path="/meta/{userId}") // Map ONLY POST Requests
+    public ResponseEntity<String> updateUserMeta (@RequestHeader("RLS-Referrer") String domain,
+                                                  @PathVariable String userId,
+                                                  @RequestBody Map<String, Object> metadata) {
+        checkValidation(domain, userId);
         try {
-            userRepository.patchMetadata((String) payload.get("user_id"), domain, payloadMetadata);
+            userRepository.updateMeta(createId(domain, userId), metadata);
+        } catch (JsonProcessingException e) {
+            throw new JSONProcessingException(e.getMessage());
+        }
+        return new ResponseEntity<>("User metadata updated successfully!", HttpStatus.OK);
+    }
+
+    @PostMapping(path="/status/{userId}") // Map ONLY POST Requests
+    public ResponseEntity<String> setStatus (@RequestHeader("RLS-Referrer") String domain,
+                                             @PathVariable String userId,
+                                             @RequestBody String status) {
+        checkValidation(domain, userId);
+        userRepository.updateStatus(createId(domain, userId), status);
+        return new ResponseEntity<>("User status changed successfully!", HttpStatus.OK);
+    }
+
+    @PatchMapping(path = "/meta/{userId}")
+    public ResponseEntity<String> setMetadata(@RequestHeader("RLS-Referrer") String domain,
+                                              @PathVariable String userId,
+                                              @RequestBody Map<String, Object> metadata) {
+        checkValidation(domain, userId);
+        if (metadata == null)
+            throw new MissingRequiredFieldException("metadata is missing or invalid.");
+
+        try {
+            userRepository.patchMetadata(createId(domain, userId), domain, metadata);
         } catch (JsonProcessingException e) {
             throw new JSONProcessingException(e.getMessage());
         }
 
         return new ResponseEntity<>("User metadata patched successfully!", HttpStatus.OK);
+    }
+
+    private void checkValidation(String domain, String userId) {
+        if (domain == null || domain.isBlank())
+            throw new MissingHeaderException("RLS-Referrer header is not present");
+
+        if (userId == null || userId.isBlank())
+            throw new MissingRequiredFieldException("user_id is missing or invalid.");
+    }
+
+    private String createId(String domain, String userId) {
+        return domain+"_"+userId;
     }
 }
