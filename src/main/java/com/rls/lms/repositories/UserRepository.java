@@ -7,10 +7,13 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface UserRepository extends JpaRepository<User, Integer> {
+public interface UserRepository extends JpaRepository<User, Integer>, ExtendedUserRepository {
+//    @Query(value = "INSERT INTO `user` (user_id, email) VALUES (‘Jo’, ‘jo@email.com’)\n ON DUPLICATE KEY UPDATE email = ‘jo@email.com’", nativeQuery = true)
+//    User save(@Param("user") User user);
+
     @Query("SELECT u FROM User u WHERE LOWER(u.domain) = LOWER(:domain)")
     List<User> findAll(@Param("domain") String domain);
 
-    @Query("SELECT u FROM User u WHERE LOWER(u.user_id) = LOWER(:user_id) AND LOWER(u.domain) = LOWER(:domain)")
-    List<User> findByUser_id(@Param("user_id") String user_id, @Param("domain") String domain);
+    @Query("SELECT u FROM User u WHERE LOWER(u.user_id) = LOWER(:userId) AND LOWER(u.domain) = LOWER(:domain)")
+    List<User> findByUserId(@Param("userId") String userId, @Param("domain") String domain);
 }
