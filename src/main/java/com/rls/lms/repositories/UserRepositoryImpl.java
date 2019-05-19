@@ -3,11 +3,13 @@ package com.rls.lms.repositories;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rls.lms.converters.DSLToSQLConverter;
+import com.rls.lms.converters.RequestParamsToSQLConverter;
 import com.rls.lms.exceptions.InvalidPayloadException;
 import com.rls.lms.exceptions.JSONProcessingException;
 import com.rls.lms.exceptions.UnsupportedPayloadTypeException;
 import com.rls.lms.models.User;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.MultiValueMap;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -73,10 +75,11 @@ public class UserRepositoryImpl implements ExtendedUserRepository {
     }
 
     @Override
-    public List findByQueryDSL(Map<String, Object> queryDSL, String domain) {
+    public List findByQueryDSL(Map<String, Object> queryDSL, String domain, MultiValueMap<String, String> requestParams) {
         @SuppressWarnings("SqlResolve")
         String query = "SELECT * FROM user u WHERE u.domain = \""+domain+"\"" +
-                DSLToSQLConverter.getSQLQueryFromDSL(queryDSL, "u", "metadata");
+                DSLToSQLConverter.getSQLQueryClauseFromDSL(queryDSL, "u", "metadata") +
+                RequestParamsToSQLConverter.getSQLQuery(requestParams, "u");
 
         return em.createNativeQuery(query, User.class).getResultList();
     }

@@ -10,9 +10,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @RestController    // This means that this class is a Controller
 @RequestMapping(path="/api/v1/users") // This means URL's start with /demo (after Application path)
@@ -28,17 +31,25 @@ public class UserController {
 
     @GetMapping(path="")
     public ResponseEntity<Iterable<User>> getAllUsers(@RequestHeader("RLS-Referrer") String domain,
+                                      @RequestParam(value = "status", required = false, defaultValue = "") String status,
                                       @RequestParam(value = "page", required = false, defaultValue = "1") int page,
                                       @RequestParam(value = "size", required = false, defaultValue = "100") int size) {
         if (domain == null || domain.isBlank())
             throw new MissingHeaderException("RLS-Referrer header is not present");
+
+        List<User> result;
+        if (status!=null && !status.isEmpty()) {
+            result = userRepository.findByStatus(domain, status, PageRequest.of(page-1, size));
+        } else {
+            result = userRepository.findAll(domain, PageRequest.of(page-1, size));
+        }
         // This returns a JSON or XML with the users
-        return new ResponseEntity<>(userRepository.findAll(domain, PageRequest.of(page-1, size)), HttpStatus.OK);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @GetMapping(path="", params = { "user_ids" })
     public ResponseEntity<Map<String, User>> getUsers(@RequestHeader("RLS-Referrer") String domain,
-                           @RequestParam(value = "user_ids", required = false, defaultValue = "") List<String> userIds) {
+                            @RequestParam(value = "user_ids", required = false, defaultValue = "") List<String> userIds) {
         if (domain == null || domain.isBlank())
             throw new MissingHeaderException("RLS-Referrer header is not present");
 
@@ -78,11 +89,12 @@ public class UserController {
 
     @PostMapping(path = "/meta/search")
     public ResponseEntity<List> search(@RequestHeader("RLS-Referrer") String domain,
-                                         @RequestBody Map<String, Object> queryDSL) {
+                                       @RequestParam MultiValueMap<String, String> requestParams,
+                                       @RequestBody Map<String, Object> queryDSL) {
         if (domain == null || domain.isBlank())
             throw new MissingHeaderException("RLS-Referrer header is not present");
 
-        List result = userRepository.findByQueryDSL(queryDSL, domain);
+        List result = userRepository.findByQueryDSL(queryDSL, domain, requestParams);
 
         return new ResponseEntity<>(result, HttpStatus.OK);
     }

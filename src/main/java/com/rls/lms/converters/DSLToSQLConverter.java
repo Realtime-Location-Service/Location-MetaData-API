@@ -10,22 +10,22 @@ import java.util.List;
 import java.util.Map;
 
 public class DSLToSQLConverter {
-    public static String getSQLQueryFromDSL(Map<String, Object> queryDSL, String tableName, String jsonColumnName) {
+    public static String getSQLQueryClauseFromDSL(Map<String, Object> queryDSL, String tableName, String jsonColumnName) {
         StringBuilder sql = new StringBuilder();
 
         queryDSL.forEach((key, value) -> {
             switch (key.toLowerCase()) {
                 case "match":
                     //noinspection unchecked
-                    buildMatchQuery(sql, (Map<String, Object>) value, tableName, jsonColumnName);
+                    buildMatchQueryClause(sql, (Map<String, Object>) value, tableName, jsonColumnName);
                     break;
                 case "except":
                     //noinspection unchecked
-                    buildExceptQuery(sql, (Map<String, Object>) value, tableName, jsonColumnName);
+                    buildExceptQueryClause(sql, (Map<String, Object>) value, tableName, jsonColumnName);
                     break;
                 case "range":
                     //noinspection unchecked
-                    buildRangeQuery(sql, (Map<String, Object>) value, jsonColumnName);
+                    buildRangeQueryClause(sql, (Map<String, Object>) value, jsonColumnName);
                     break;
                 default:
                     throw new UnsupportedSearchParameter("'" + key + "' search is not supported");
@@ -35,26 +35,26 @@ public class DSLToSQLConverter {
         return sql.toString();
     }
 
-    private static void buildMatchQuery(StringBuilder sql, Map<String, Object> payload, String tableName, String jsonColumnName) {
+    private static void buildMatchQueryClause(StringBuilder sql, Map<String, Object> payload, String tableName, String jsonColumnName) {
         payload.forEach((key, value) ->
-            buildJSONContainsPhrase(sql, tableName+"."+jsonColumnName, value, "$."+key, true)
+            buildJSONContainsClause(sql, tableName+"."+jsonColumnName, value, "$."+key, true)
         );
     }
 
-    private static void buildExceptQuery(StringBuilder sql, Map<String, Object> payload, String tableName, String jsonColumnName) {
+    private static void buildExceptQueryClause(StringBuilder sql, Map<String, Object> payload, String tableName, String jsonColumnName) {
         payload.forEach((key, value) ->
-            buildJSONContainsPhrase(sql, tableName+"."+jsonColumnName, value, "$."+key, false)
+            buildJSONContainsClause(sql, tableName+"."+jsonColumnName, value, "$."+key, false)
         );
     }
 
-    private static void buildRangeQuery(StringBuilder sql, Map<String, Object> payload, String jsonColumnName) {
+    private static void buildRangeQueryClause(StringBuilder sql, Map<String, Object> payload, String jsonColumnName) {
         payload.forEach((key, value) -> {
             //noinspection unchecked
-            buildComparisonPhrase(sql, (Map<String, Object>) value, jsonColumnName, "$."+key);
+            buildComparisonClause(sql, (Map<String, Object>) value, jsonColumnName, "$."+key);
         });
     }
 
-    private static void buildComparisonPhrase(StringBuilder sql, Map<String, Object> payload, String jsonColumnName, String path) {
+    private static void buildComparisonClause(StringBuilder sql, Map<String, Object> payload, String jsonColumnName, String path) {
         payload.forEach((key, value) -> {
             sql.append(" AND ").append(jsonColumnName).append("->'").append(path).append("'");
             if (key.equalsIgnoreCase("lt")) {
@@ -71,7 +71,7 @@ public class DSLToSQLConverter {
         });
     }
 
-    private static void buildJSONContainsPhrase(StringBuilder sql, String target, Object candidate,
+    private static void buildJSONContainsClause(StringBuilder sql, String target, Object candidate,
                                                 String path, boolean match, boolean appendOperator)
             throws JSONProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -88,7 +88,7 @@ public class DSLToSQLConverter {
         else sql.append("=0");
     }
 
-    private static void buildJSONContainsPhrase(StringBuilder sql, String target, Object candidate,
+    private static void buildJSONContainsClause(StringBuilder sql, String target, Object candidate,
                                                 String path, boolean match) throws InvalidPayloadException, JSONProcessingException {
         if (candidate instanceof List) {
             List list = (List) candidate;
@@ -96,27 +96,27 @@ public class DSLToSQLConverter {
                 throw new JSONProcessingException(path + " list contains no item.");
             } else {
 //                sql.append(objectMapper.writeValueAsString(list.get(0)));
-                buildJSONContainsPhrase(sql, target, candidate, path, match, true);
+                buildJSONContainsClause(sql, target, candidate, path, match, true);
             }
         } else if(candidate instanceof Map) {
             for(Object entry : ((Map) candidate).entrySet()) {
                 if (!match) {
-                    buildOperatorJSONContainsPhrase(sql, target, ((Map.Entry)entry).getValue(),
+                    buildOperatorJSONContainsClause(sql, target, ((Map.Entry)entry).getValue(),
                             path, false, translateOperator((String) ((Map.Entry)entry).getKey(), false));
                 } else {
                     String operator = (String) ((Map.Entry)entry).getKey();
                     if (operator.equalsIgnoreCase("ANY")) {
-                        buildOperatorJSONContainsPhrase(sql, target, ((Map.Entry)entry).getValue(),
+                        buildOperatorJSONContainsClause(sql, target, ((Map.Entry)entry).getValue(),
                                 path, true, translateOperator("ANY", true));
                     } else if (operator.equalsIgnoreCase("ALL")) {
-                        buildJSONContainsPhrase(sql, target, ((Map.Entry)entry).getValue(), path, true, true);
+                        buildJSONContainsClause(sql, target, ((Map.Entry)entry).getValue(), path, true, true);
                     } else {
                         throw new InvalidPayloadException("Operator '"+((Map.Entry)entry).getKey()+"' is unknown!");
                     }
                 }
             }
         } else {
-            buildJSONContainsPhrase(sql, target, candidate, path, match, true);
+            buildJSONContainsClause(sql, target, candidate, path, match, true);
         }
     }
 
@@ -128,8 +128,8 @@ public class DSLToSQLConverter {
         throw new InvalidPayloadException("Operator '"+operator+"' is unknown!");
     }
 
-    private static void buildOperatorJSONContainsPhrase(StringBuilder sql, String target, Object candidate,
-                                                          String path, boolean match, String operator) throws JSONProcessingException {
+    private static void buildOperatorJSONContainsClause(StringBuilder sql, String target, Object candidate,
+                                                        String path, boolean match, String operator) throws JSONProcessingException {
         if (candidate instanceof List) {
             List list = (List) candidate;
             if (list.size() == 0) {
@@ -142,13 +142,13 @@ public class DSLToSQLConverter {
                     } else {
                         sql.append(operator);
                     }
-                    buildJSONContainsPhrase(sql, target, item, path, match, false);
+                    buildJSONContainsClause(sql, target, item, path, match, false);
                     appendOperator = true;
                 }
                 sql.append(")");
             }
         } else {
-            buildJSONContainsPhrase(sql, target, candidate, path, match, true);
+            buildJSONContainsClause(sql, target, candidate, path, match, true);
         }
     }
 }
