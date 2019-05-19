@@ -25,7 +25,7 @@ public class DSLToSQLConverter {
                     break;
                 case "range":
                     //noinspection unchecked
-                    buildRangeQuery(sql, (Map<String, Object>) value, tableName, jsonColumnName);
+                    buildRangeQuery(sql, (Map<String, Object>) value, jsonColumnName);
                     break;
                 default:
                     throw new UnsupportedSearchParameter("'" + key + "' search is not supported");
@@ -36,21 +36,38 @@ public class DSLToSQLConverter {
     }
 
     private static void buildMatchQuery(StringBuilder sql, Map<String, Object> payload, String tableName, String jsonColumnName) {
-        payload.forEach((key, value) -> {
-            buildJSONContainsPhrase(sql, tableName+"."+jsonColumnName, value, "$."+key, true);
-        });
+        payload.forEach((key, value) ->
+            buildJSONContainsPhrase(sql, tableName+"."+jsonColumnName, value, "$."+key, true)
+        );
     }
 
     private static void buildExceptQuery(StringBuilder sql, Map<String, Object> payload, String tableName, String jsonColumnName) {
+        payload.forEach((key, value) ->
+            buildJSONContainsPhrase(sql, tableName+"."+jsonColumnName, value, "$."+key, false)
+        );
+    }
+
+    private static void buildRangeQuery(StringBuilder sql, Map<String, Object> payload, String jsonColumnName) {
         payload.forEach((key, value) -> {
-            buildJSONContainsPhrase(sql, tableName+"."+jsonColumnName, value, "$."+key, false);
+            //noinspection unchecked
+            buildComparisonPhrase(sql, (Map<String, Object>) value, jsonColumnName, "$."+key);
         });
     }
 
-    private static void buildRangeQuery(StringBuilder sql, Map<String, Object> payload, String tableName, String jsonColumnName) {
+    private static void buildComparisonPhrase(StringBuilder sql, Map<String, Object> payload, String jsonColumnName, String path) {
         payload.forEach((key, value) -> {
-            buildJSONContainsPhrase(sql, tableName+"."+jsonColumnName, value, "$."+key, false);
-            sql.append("=0");
+            sql.append(" AND ").append(jsonColumnName).append("->'").append(path).append("'");
+            if (key.equalsIgnoreCase("lt")) {
+                sql.append(" < ").append(value);
+            } else if (key.equalsIgnoreCase("lte")) {
+                sql.append(" <= ").append(value);
+            } else if (key.equalsIgnoreCase("gt")) {
+                sql.append(" > ").append(value);
+            } else if (key.equalsIgnoreCase("gte")) {
+                sql.append(" >= ").append(value);
+            } else {
+                throw new JSONProcessingException("Comparison operator '"+key+"' is not supported.");
+            }
         });
     }
 
