@@ -59,7 +59,7 @@ public class UserController {
         return new ResponseEntity<>("User metadata saved successfully!", HttpStatus.OK);
     }
 
-    @PatchMapping(path = "/meta/{userId}")
+    @PatchMapping(path = "{userId}/meta")
     public ResponseEntity<String> patchMetadata(@RequestHeader("RLS-Referrer") String domain,
                                                 @PathVariable String userId,
                                                 @RequestBody Map<String, Object> payload) {

@@ -26,7 +26,7 @@
             }
         }
 
-4. **PATCH** /api/v1/users/meta/{user_id}
+4. **PATCH** /api/v1/users/{user_id}/meta
    
    **Description:** Merge the given user metadata with 
    existing value.
@@ -98,7 +98,7 @@
            }
        }
            
-7. **POST** /api/v1/user/meta/search
+7. **POST** /api/v1/users/meta/search
    
    **Description** Gets users satisfying the query.
    

@@ -6,6 +6,7 @@ import com.rls.lms.converters.DSLToSQLConverter;
 import com.rls.lms.exceptions.InvalidPayloadException;
 import com.rls.lms.exceptions.JSONProcessingException;
 import com.rls.lms.exceptions.UnsupportedPayloadTypeException;
+import com.rls.lms.models.User;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
@@ -74,8 +75,10 @@ public class UserRepositoryImpl implements ExtendedUserRepository {
     @Override
     public List findByQueryDSL(Map<String, Object> queryDSL, String domain) {
         @SuppressWarnings("SqlResolve")
-        String query = "SELECT * FROM user u WHERE "+ DSLToSQLConverter.getSQLQueryFromDSL(queryDSL)+" AND u.domain = \""+domain+"\"";
+        String query = "SELECT * FROM user u WHERE "+
+                DSLToSQLConverter.getSQLQueryFromDSL(queryDSL, "u", "metadata")+
+                " AND u.domain = \""+domain+"\"";
 
-        return em.createNativeQuery(query).getResultList();
+        return em.createNativeQuery(query, User.class).getResultList();
     }
 }
