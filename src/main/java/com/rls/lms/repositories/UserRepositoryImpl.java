@@ -75,9 +75,8 @@ public class UserRepositoryImpl implements ExtendedUserRepository {
     @Override
     public List findByQueryDSL(Map<String, Object> queryDSL, String domain) {
         @SuppressWarnings("SqlResolve")
-        String query = "SELECT * FROM user u WHERE "+
-                DSLToSQLConverter.getSQLQueryFromDSL(queryDSL, "u", "metadata")+
-                " AND u.domain = \""+domain+"\"";
+        String query = "SELECT * FROM user u WHERE u.domain = \""+domain+"\"" +
+                DSLToSQLConverter.getSQLQueryFromDSL(queryDSL, "u", "metadata");
 
         return em.createNativeQuery(query, User.class).getResultList();
     }

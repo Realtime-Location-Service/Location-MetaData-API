@@ -1,5 +1,7 @@
 # Location-MetaData-API
 
+### API Endpoints
+
 1. Support for 10,000 delivery 1 day. Say, morning 1hr, noon 1hr, night 1hr traffic. (10,000 / 3 / 60 / 60) = 1 req/sec
 
 2. **Table**: 
@@ -100,18 +102,25 @@
            
 7. **POST** /api/v1/users/meta/search
    
-   **Description** Gets users satisfying the query.
+   **Description** Gets users satisfying the query. There are three supported
+   types of query available. MATCH, EXCEPT and RANGE. for details see the 
+   "Search Query Types" section.
    
    **Payload** 
     
         "match": {
             "name": "abul",
             "city": ["Dhaka", "Khulna", "Tangail"],
-            "carrying": ["abul", "mofiz"]
+            "carrying": {
+                "all": ["abul", "mofiz"]
+            }
         },
         "except": {
             "name": "mofiz",
             "city": ["Sylhet", "Chittagong"]
+            "carrying": {
+                "all": ["abul", "mofiz"]
+            }
         },
         "range": {
             "age": {
@@ -120,6 +129,75 @@
               }
         }
 
+
+### Search Query Types
+
+There are three supported types of query available. MATCH, EXCEPT and RANGE.
+
+#### 1. MATCH:
+Match query returns all the items that matches the required terms. The value of 
+MATCH can either be a primitive types or an array of primitive types or an 
+"ANY" or "ALL" query object.
+    
+    "except": {
+        "carrying": {
+            "ANY": ["abul", "mofiz"]
+        },
+        "name": "mofiz"
+    }
+
+##### i. ANY:
+The value of "ANY" must be a list type. Satisfies if any of the item of the list
+is found. 
+
+    "match": {
+        "carrying": {
+            "ANY": ["abul", "mofiz"]
+        }
+    }
+    
+##### ii. ALL:
+The value of "ANY" must be a list type. Satisfies if all of the item of the list
+is found. This is the default behaviour if ALL or ANY nothing is specified for an array.
+
+    "match": {
+        "carrying": {
+            "ALL": ["abul", "mofiz"]
+        }
+    }
+    
+#### 1. EXCEPT:
+Except query returns all the items that does not matches the required terms. The value of 
+EXCEPT can either be a primitive types or an array of primitive types or an 
+"ANY" or "ALL" query object.
+    
+    "except": {
+        "carrying": {
+            "ANY": ["abul", "mofiz"]
+        },
+        "name": "mofiz"
+    }
+
+##### i. ANY:
+The value of "ANY" must be a list type. Satisfies if any of the item of the list
+is found. 
+
+    "except": {
+        "carrying": {
+            "ANY": ["abul", "mofiz"]
+        }
+    }
+    
+##### ii. ALL:
+The value of "ALL" must be a list type. Satisfies if all of the item of the list
+is found. This is the default behaviour if ALL or ANY nothing is specified for an array.
+
+    "except": {
+        "carrying": {
+            "ALL": ["abul", "mofiz"]
+        }
+    }
+    
 
 ### Start db in dev:
 1. docker-compose up -d
