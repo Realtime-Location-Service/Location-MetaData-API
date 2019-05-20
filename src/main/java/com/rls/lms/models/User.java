@@ -3,43 +3,32 @@ package com.rls.lms.models;
 import com.rls.lms.converters.JSONToMapConverter;
 import org.springframework.validation.annotation.Validated;
 
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
 @Entity // This tells Hibernate to make a table out of this class
 @Validated
 @SuppressWarnings("unused")
+@IdClass(CompositeKey.class)
 public class User {
 
     @Id
     @NotNull
-    private String id;
-
-    @NotNull
     @Column(name = "user_id", unique = true)
     private String user_id;
 
-    private String status;
-
+    @Id
     @NotNull
     private String domain;
+
+    private String status;
 
     @Column(name = "metadata", columnDefinition = "json")
     @Convert(converter = JSONToMapConverter.class)
     private Map<String, Object> metadata = new HashMap<>();
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
 
     public String getUser_id() {
         return user_id;
@@ -71,5 +60,26 @@ public class User {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+}
+
+class CompositeKey implements Serializable {
+    private String domain;
+    private String user_id;
+
+    public String getDomain() {
+        return domain;
+    }
+
+    public void setDomain(String domain) {
+        this.domain = domain;
+    }
+
+    public String getUser_id() {
+        return user_id;
+    }
+
+    public void setUser_id(String user_id) {
+        this.user_id = user_id;
     }
 }

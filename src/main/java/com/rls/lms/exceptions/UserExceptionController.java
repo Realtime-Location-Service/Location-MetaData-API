@@ -27,4 +27,19 @@ public class UserExceptionController {
     public ResponseEntity<Object> exception(JSONProcessingException exception) {
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(value = InvalidPayloadException.class)
+    public ResponseEntity<Object> exception(InvalidPayloadException exception) {
+        return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(value = UnsupportedPayloadTypeException.class)
+    public ResponseEntity<Object> exception(UnsupportedPayloadTypeException exception) {
+        return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+    
+    @ExceptionHandler(value = UnsupportedSearchParameter.class)
+    public ResponseEntity<Object> exception(UnsupportedSearchParameter exception) {
+        return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
+    }
 }
