@@ -1,20 +1,28 @@
 buildscript {
     repositories {
         mavenCentral()
+        maven {
+            url("https://dl.bintray.com/palantir/releases/")
+        }
     }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:2.1.4.RELEASE")
+        // https://mvnrepository.com/artifact/com.palantir.gradle.docker/gradle-docker
+        classpath(group: 'com.palantir.gradle.docker', name: 'gradle-docker', version: '0.22.1')
     }
 }
+
+group = 'sazid1462'
 
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
+apply plugin: 'com.palantir.docker'
 
 bootJar {
-    baseName = 'location-metadata-service'
+    baseName = 'metadata-service'
     version =  '0.1.0'
 }
 
@@ -24,6 +32,25 @@ repositories {
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
+
+configurations {
+    developmentOnly
+    runtimeClasspath {
+        extendsFrom developmentOnly
+    }
+}
+
+task unpack(type: Copy) {
+    dependsOn bootJar
+    from(zipTree(tasks.bootJar.outputs.files.singleFile))
+    into("build/dependency")
+}
+
+docker {
+    name "${project.group}/${bootJar.baseName}"
+    copySpec.from(tasks.unpack.outputs).into("dependency")
+    buildArgs(['DEPENDENCY': "dependency"])
+}
 
 dependencies {
     compile("org.springframework.boot:spring-boot-starter-web")
