@@ -4,6 +4,8 @@
     <bytecodeTargetLevel>
       <module name="Location-MetaData-API.main" target="1.8" />
       <module name="Location-MetaData-API.test" target="1.8" />
+      <module name="Location-MetaData-API_main" target="1.8" />
+      <module name="Location-MetaData-API_test" target="1.8" />
       <module name="sazid1462.Location-MetaData-API.main" target="1.8" />
       <module name="sazid1462.Location-MetaData-API.test" target="1.8" />
     </bytecodeTargetLevel>
