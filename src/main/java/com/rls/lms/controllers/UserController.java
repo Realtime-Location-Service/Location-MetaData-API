@@ -57,14 +57,14 @@ public class UserController {
         userIds.forEach((String id) -> result.putIfAbsent(id, null));
 
         userRepository.find(domain, result.keySet().toArray(new String[]{})).
-                forEach((User u) -> result.replace(u.getUser_id(), u));
+                forEach((User u) -> result.replace(u.getUserId(), u));
         // This returns a JSON or XML with the users
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @PostMapping(path="/meta") // Map ONLY POST Requests
     public ResponseEntity<String> addNewUser (@RequestHeader("RLS-Referrer") String domain, @RequestBody User user) {
-        checkValidation(domain, user.getUser_id());
+        checkValidation(domain, user.getUserId());
         user.setDomain(domain);
         userRepository.save(user);
         return new ResponseEntity<>("User metadata saved successfully!", HttpStatus.OK);

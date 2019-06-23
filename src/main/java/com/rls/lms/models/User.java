@@ -12,13 +12,13 @@ import java.util.Map;
 @Entity // This tells Hibernate to make a table out of this class
 @Validated
 @SuppressWarnings("unused")
-@IdClass(CompositeKey.class)
+@IdClass(User.CompositeKey.class)
 public class User {
 
     @Id
     @NotNull
-    @Column(name = "user_id", unique = true)
-    private String user_id;
+    @Column(name = "user_id")
+    private String userId;
 
     @Id
     @NotNull
@@ -30,12 +30,12 @@ public class User {
     @Convert(converter = JSONToMapConverter.class)
     private Map<String, Object> metadata = new HashMap<>();
 
-    public String getUser_id() {
-        return user_id;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setUser_id(String userId) {
-        this.user_id = userId;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public String getDomain() {
@@ -61,25 +61,26 @@ public class User {
     public void setStatus(String status) {
         this.status = status;
     }
+
+    static class CompositeKey implements Serializable {
+        private String domain;
+        private String userId;
+
+        public String getDomain() {
+            return domain;
+        }
+
+        public void setDomain(String domain) {
+            this.domain = domain;
+        }
+
+        public String getUserId() {
+            return userId;
+        }
+
+        public void setUserId(String userId) {
+            this.userId = userId;
+        }
+    }
 }
 
-class CompositeKey implements Serializable {
-    private String domain;
-    private String user_id;
-
-    public String getDomain() {
-        return domain;
-    }
-
-    public void setDomain(String domain) {
-        this.domain = domain;
-    }
-
-    public String getUser_id() {
-        return user_id;
-    }
-
-    public void setUser_id(String user_id) {
-        this.user_id = user_id;
-    }
-}

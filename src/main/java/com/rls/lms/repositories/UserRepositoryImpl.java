@@ -75,7 +75,8 @@ public class UserRepositoryImpl implements ExtendedUserRepository {
     }
 
     @Override
-    public List findByQueryDSL(Map<String, Object> queryDSL, String domain, MultiValueMap<String, String> requestParams) {
+    public List findByQueryDSL(Map<String, Object> queryDSL, String domain,
+                               MultiValueMap<String, String> requestParams) {
         @SuppressWarnings("SqlResolve")
         String query = "SELECT * FROM user u WHERE u.domain = \""+domain+"\"" +
                 DSLToSQLConverter.getSQLQueryClauseFromDSL(queryDSL, "u", "metadata") +

@@ -4,7 +4,7 @@ Metadata are dynamic variables related to an entity. We assumed the entity is an
 All the metadata are stored in a column called 'metadata' in a table having structure of 
 
     user (
-        user_id: string (pk), 
+        userId: string (pk), 
         domain: string (pk), 
         status: string, 
         metadata: json
@@ -26,7 +26,7 @@ We ensure to support 10,000 delivery 1 day. Say, morning 1hr, noon 1hr, night 1h
    **Payload** 
         
         {
-            "user_id": "13123", 
+            "userId": "13123", 
             "status": "online", 
             "metadata": {
                 "meta1": v1,
@@ -34,7 +34,7 @@ We ensure to support 10,000 delivery 1 day. Say, morning 1hr, noon 1hr, night 1h
             }
         }
 
-2. **PATCH** /api/v1/users/{user_id}/meta
+2. **PATCH** /api/v1/users/{userId}/meta
    
    **Description:** Merge the given user metadata with 
    existing value.
@@ -64,7 +64,7 @@ We ensure to support 10,000 delivery 1 day. Say, morning 1hr, noon 1hr, night 1h
    
    **ResponseBody:** Contains a list of users.
       
-4. **GET** /api/v1/users?user_ids=
+4. **GET** /api/v1/users?userIds=
       
    **Description:** Returns all users having user_ids.
   
