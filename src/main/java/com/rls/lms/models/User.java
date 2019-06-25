@@ -1,5 +1,7 @@
 package com.rls.lms.models;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.rls.lms.converters.JSONToMapConverter;
 import org.springframework.validation.annotation.Validated;
 
@@ -13,6 +15,7 @@ import java.util.Map;
 @Validated
 @SuppressWarnings("unused")
 @IdClass(User.CompositeKey.class)
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class User {
 
     @Id
