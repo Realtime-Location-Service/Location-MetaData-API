@@ -18,6 +18,7 @@ services:
     image: rls42/metadata-service:1.0.0
     volumes:
       - "./initdb.sql:/app/initdb.sql"
+      - "./logs:/app/lib/logs"
     environment:
       - "SERVER_PORT=7001"
       - "SPRING_PROFILES_ACTIVE=dev"
