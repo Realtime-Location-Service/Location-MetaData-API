@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -57,14 +56,14 @@ public class UserController {
         userIds.forEach((String id) -> result.putIfAbsent(id, null));
 
         userRepository.find(domain, result.keySet().toArray(new String[]{})).
-                forEach((User u) -> result.replace(u.getUser_id(), u));
+                forEach((User u) -> result.replace(u.getUserId(), u));
         // This returns a JSON or XML with the users
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @PostMapping(path="/meta") // Map ONLY POST Requests
     public ResponseEntity<String> addNewUser (@RequestHeader("RLS-Referrer") String domain, @RequestBody User user) {
-        checkValidation(domain, user.getUser_id());
+        checkValidation(domain, user.getUserId());
         user.setDomain(domain);
         userRepository.save(user);
         return new ResponseEntity<>("User metadata saved successfully!", HttpStatus.OK);
@@ -89,12 +88,15 @@ public class UserController {
 
     @PostMapping(path = "/meta/search")
     public ResponseEntity<List> search(@RequestHeader("RLS-Referrer") String domain,
-                                       @RequestParam MultiValueMap<String, String> requestParams,
+                                       @RequestParam(value = "user_ids", required = false, defaultValue = "") List<String> userIds,
+                                       @RequestParam(value = "status", required = false, defaultValue = "") String status,
+                                       @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+                                       @RequestParam(value = "size", required = false, defaultValue = "100") int size,
                                        @RequestBody Map<String, Object> queryDSL) {
         if (domain == null || domain.isBlank())
             throw new MissingHeaderException("RLS-Referrer header is not present");
 
-        List result = userRepository.findByQueryDSL(queryDSL, domain, requestParams);
+        List result = userRepository.findByQueryDSL(queryDSL, domain, userIds, status, page-1, size);
 
         return new ResponseEntity<>(result, HttpStatus.OK);
     }

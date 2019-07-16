@@ -3,6 +3,7 @@
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel>
       <module name="Location-MetaData-API.main" target="1.8" />
+      <module name="Location-MetaData-API.rls42.Location-MetaData-API.test" target="1.8" />
       <module name="Location-MetaData-API.test" target="1.8" />
       <module name="rls42.Location-MetaData-API.main" target="1.8" />
       <module name="rls42.Location-MetaData-API.test" target="1.8" />

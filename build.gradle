@@ -23,7 +23,7 @@ apply plugin: 'com.palantir.docker'
 
 bootJar {
     baseName = 'metadata-service'
-    version =  '0.1.0'
+    version =  '1.0.0'
 }
 
 repositories {
@@ -57,6 +57,10 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter-actuator")
     // JPA Data (We are going to use Repositories, Entities, Hibernate, etc...)
     compile 'org.springframework.boot:spring-boot-starter-data-jpa'
+    compile "org.flywaydb:flyway-core:5.2.4"
+    // https://mvnrepository.com/artifact/com.google.guava/guava
+    compile group: 'com.google.guava', name: 'guava', version: '28.0-jre'
+
     // Use MySQL Connector-J
     compile 'mysql:mysql-connector-java'
 

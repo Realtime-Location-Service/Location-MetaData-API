@@ -7,8 +7,23 @@ services:
       - ./db_data:/var/lib/mysql
     environment:
       - MYSQL_ROOT_PASSWORD=root
-      - MYSQL_DATABASE=lmsstore
-      - MYSQL_USER=lms
+      - MYSQL_DATABASE=mds_db
+      - MYSQL_USER=mds_user
       - MYSQL_PASSWORD=12345678
     ports:
       - "3306:3306"
+      -
+  metadata_service:
+    container_name: metadata_service
+    image: rls42/metadata-service:1.0.0
+    volumes:
+      - "./initdb.sql:/app/initdb.sql"
+      - "./logs:/app/lib/logs"
+    environment:
+      - "SERVER_PORT=7001"
+      - "SPRING_PROFILES_ACTIVE=dev"
+      - "SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/mds_db"
+      - "SPRING_DATASOURCE_USERNAME=mds_user"
+      - "SPRING_DATASOURCE_PASSWORD=12345678"
+    ports:
+      - "7001:7001"

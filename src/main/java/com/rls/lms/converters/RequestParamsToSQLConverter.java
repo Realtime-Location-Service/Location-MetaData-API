@@ -1,22 +1,24 @@
 package com.rls.lms.converters;
 
-import org.springframework.util.MultiValueMap;
+import java.util.List;
 
 public class RequestParamsToSQLConverter {
-    public static String getSQLQuery(MultiValueMap<String, String> requestParams, String tableName) {
+    public static String getSQLQuery(List<String> userIds, String status, int page, int size, String tableName) {
         StringBuilder sql = new StringBuilder();
-        final int[] page = {1};
-        final int[] size = {100};
+        final int[] p = {Math.max(0, page)};
+        final int[] s = {Math.max(0, size)};
 
-        requestParams.forEach((key, value) -> {
-            if (key.equalsIgnoreCase("page")) page[0] = Integer.parseInt(value.get(0));
-            else if (key.equalsIgnoreCase("size")) size[0] = Integer.parseInt(value.get(0));
-            else {
-                sql.append(" AND ");
-                sql.append(tableName).append(".").append(key).append(" IN (").append(String.join(",", value)).append(")");
-            }
-        });
-        sql.append(" LIMIT ").append((page[0] - 1) * size[0]).append(", ").append(size[0]);
+        if (!userIds.isEmpty()) {
+            sql.append(" AND ");
+            sql.append(tableName).append(".").append("user_id").append(" IN (").append(String.join(",", userIds)).append(")");
+        }
+
+        if (!status.isEmpty()) {
+            sql.append(" AND ");
+            sql.append(tableName).append(".").append("status").append(" IN (").append(status).append(")");
+        }
+
+        sql.append(" LIMIT ").append((p[0]) * s[0]).append(", ").append(s[0]);
 
         return sql.toString();
     }

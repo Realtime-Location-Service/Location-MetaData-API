@@ -18,9 +18,9 @@ public interface UserRepository extends JpaRepository<User, Integer>, ExtendedUs
     @Query("SELECT u FROM User u WHERE LOWER(u.domain) = LOWER(:domain) AND LOWER(u.status) = LOWER(:status)")
     List<User> findByStatus(@Param("domain") String domain, @Param("status") String Status, Pageable pageable);
 
-    @Query("SELECT u FROM User u WHERE LOWER(u.user_id) = LOWER(:userId) AND LOWER(u.domain) = LOWER(:domain)")
+    @Query("SELECT u FROM User u WHERE LOWER(u.userId) = LOWER(:userId) AND LOWER(u.domain) = LOWER(:domain)")
     List<User> findByUserId(@Param("userId") String userId, @Param("domain") String domain);
 
-    @Query("SELECT u FROM User u WHERE u.user_id IN (:userIds) AND LOWER(u.domain) = LOWER(:domain)")
+    @Query("SELECT u FROM User u WHERE u.userId IN (:userIds) AND LOWER(u.domain) = LOWER(:domain)")
     List<User> find(String domain, String[] userIds);
 }
