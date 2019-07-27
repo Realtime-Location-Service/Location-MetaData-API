@@ -230,3 +230,9 @@ keys are the column name and values are the row values.
 
 ### Start the application:
     ./gradlew bootRun
+    
+## Release Notes:
+#### 1.0.1: 
+Improved error response
+#### 1.0.0: 
+Released first production version
