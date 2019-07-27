@@ -23,7 +23,7 @@ apply plugin: 'com.palantir.docker'
 
 bootJar {
     baseName = 'metadata-service'
-    version =  '1.0.0'
+    version =  '1.0.1'
 }
 
 repositories {

@@ -15,7 +15,7 @@ services:
       -
   metadata_service:
     container_name: metadata_service
-    image: rls42/metadata-service:1.0.0
+    image: rls42/metadata-service:1.0.1
     volumes:
       - "./initdb.sql:/app/initdb.sql"
       - "./logs:/app/lib/logs"
